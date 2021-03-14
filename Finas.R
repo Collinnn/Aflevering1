@@ -47,3 +47,5 @@ SPY <- D$SPY ##Only reason is so the name isn't D$AGG
 hist(SPY, xlab="Return (AGG)", prob=TRUE,col="DARKGREEN",border="BLUE")
 qqnorm(SPY)
 qqline(SPY)
+
+
