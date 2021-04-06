@@ -8,15 +8,12 @@
 ## (i.e. no backslash).
 setwd("Replace with path to directory containing project files.")
 
-
 ###########################################################################
 ## Read data into R
 
-## Read data from finans1_data.csv
-D <- read.table("finans1_data.csv", header=TRUE, sep=";", as.is=TRUE)
-## Keep only the dates and the ETFs AGG, VAW, IWN, and SPY
-D <- D[ ,c("t","AGG","VAW","IWN","SPY")]
-
+## Read data from soenderborg1_data.csv
+D <- read.table("soenderborg1_data.csv", header=TRUE, sep=";", 
+                as.is=TRUE)
 
 ###########################################################################
 ## Simple overview of the data
@@ -34,14 +31,13 @@ summary(D)
 ## Another type of summary of the dataset
 str(D)
 
-
 ###########################################################################
 ## Histogram (empirical density)
 
-## Histogram describing the empirical density of the weekly returns from
-## AGG (histogram of weekly returns normalized to have an area of 1)
-hist(D$AGG, xlab="Return (AGG)", prob=TRUE)
-
+## Histogram describing the empirical density of the daily heat 
+## consumptions of House 1 (histogram of daily consumptions normalized 
+## to have an area of 1)
+hist(D$Q1, xlab="Heat consumption (House 1)", prob=TRUE)
 
 ###########################################################################
 ## Conversion to a date variable
@@ -51,129 +47,128 @@ D$t <- as.Date(x=D$t, format="%Y-%m-%d")
 ## Checks the result
 summary(D$t)
 
+###########################################################################
+## Plot of data over time
+
+## Plot of heat consumption over time
+plot(D$t, D$Q1, type="l", xlim=as.Date(c("2008-10-02","2010-10-01")), 
+     ylim=c(0,9), xlab="Date", ylab="Heat consumption", col=2)
+lines(D$t, D$Q2, col=3)
+lines(D$t, D$Q3, col=4)
+lines(D$t, D$Q4, col=5)
+## Add a legend
+legend("topright", legend=paste0("Q", c(1,2,3,4)), lty=1, col=2:5)
 
 ###########################################################################
-## Plots of data over time
+## Taking a subset
 
-## Plots of weekly return over time for each of the four ETFs
-ylim <- c(-0.2,0.2)
-## Plot of weekly return over time for AGG
-plot(D$t, D$AGG, type="l", ylim=ylim, xlab="Date", ylab="Return AGG")
-## Similar plots for the three other ETFs
-plot(D$t, D$VAW, type="l", ylim=ylim, xlab="Date", ylab="Return VAW")
-plot(D$t, D$IWN, type="l", ylim=ylim, xlab="Date", ylab="Return IWN")
-plot(D$t, D$SPY, type="l", ylim=ylim, xlab="Date", ylab="Return SPY")
-
+## Subset of the data: only Jan-Feb 2010
+Dsel <- subset(D, "2010-01-01" <= t & t < "2010-3-01")
 
 ###########################################################################
 ## Box plot
 
-## Box plot of weekly returns by ETF
-boxplot(D$AGG, D$VAW, D$IWN, D$SPY, names=c("AGG", "VAW", "IWN", "SPY"),
-        xlab="ETF", ylab="Return")
-
+## Box plot of daily heat consumption by house
+boxplot(Dsel[ ,c("Q1","Q2","Q3","Q4")],
+        xlab="House", ylab="Heat consumption")
 
 ###########################################################################
-## Summary statistics for weekly AGG returns
+## Summary statistics for daily heat consumptions
 
-## Total number of observations
+## Total number of observations for House 1 during Jan-Feb 2010
 ## (doesn't include missing values if there are any)
-sum(!is.na(D$AGG))
-## Sample mean for weekly returns from AGG
-mean(D$AGG, na.rm=TRUE)
-## Sample variance for weekly returns from AGG
-var(D$AGG, na.rm=TRUE)
+sum(!is.na(Dsel$Q1))
+## Sample mean of daily heat consumption for House 1, Jan-Feb 2010
+mean(Dsel$Q1, na.rm=TRUE)
+## Sample variance of daily heat consumption for House 1, Jan-Feb 2010
+var(Dsel$Q1, na.rm=TRUE)
 ## etc.
 ##
 ## The argument 'na.rm=TRUE' ensures that the statistic is
 ## computed even in cases where there are missing values.
 
-
 ###########################################################################
 ## qq-plot for model validation
 
-## qq-plot of AGG's weekly returns
-qqnorm(D$AGG)
-qqline(D$AGG)
-
+## qq-plot of daily heat consumption (House 1)
+qqnorm(Dsel$Q1)
+qqline(Dsel$Q1)
 
 ###########################################################################
 ## Confidence interval for the mean
 
-## CI for the mean weekly return from AGG
-t.test(D$AGG, conf.level=0.95)$conf.int
-
+## CI for the mean daily heat consumption of House 1
+t.test(Dsel$Q1, conf.level=0.95)$conf.int
 
 ###########################################################################
 ## One-sample t-test
 
-## Testing the hypothesis mu=0 for weekly AGG returns
-t.test(D$AGG, mu=0)
-
+##  Testing hypothesis mu=2.38 for daily heat consumption 
+## (House 1, Jan-Feb 2010)
+t.test(Dsel$Q1, mu=2.38)
 
 ###########################################################################
 ## Welch t-test for comparing two (independent) samples
 
-## Comparing the mean weekly returns from VAW and AGG
-t.test(D$VAW, D$AGG)
-
+## Comparing the heat consumption of House 1 and 2
+t.test(Dsel$Q1, Dsel$Q2)
 
 ###########################################################################
 ## Computing correlations
 
-## Computing the correlation between selected ETFs
-cor(D[ ,c("AGG","VAW","IWN","SPY")], use="pairwise.complete.obs")
-
+## Correlation between heat consumption and global radiation
+cor(D[, c("Q1","G")], use="pairwise.complete.obs")
 
 ###########################################################################
 ## Subsets in R
-  
+
 ## Optional extra remark about taking subsets in R
 ##
-## A logical vector with a TRUE or FALSE for row value in D.
-## E.g.: The weeks with losses (negative returns) from AGG
-D$AGG < 0
-## Can be used to extract all AGG losses
-D$AGG[D$AGG < 0]
-## Alternatively, use the 'subset' function
-subset(D, AGG < 0)
+## A logical vector with TRUE or FALSE for each row in D, e.g.:
+## Finding days with frost
+D$Ta < 0
+## Can be used to extract heat consumptions for House 1 on 
+## days with frost
+D$Q1[D$Ta < 0]
+## The 'subset' function can be used as well
+subset(D, Ta < 0)
 ## More complex logical expressions can be made, e.g.:
-## Find all observations from 2009
-subset(D, "2009-01-01" < t & t < "2010-01-01")
-
+## Observations from days with frost before 2010
+subset(D, t < "2010-01-01" & Ta < 0)
 
 ###########################################################################
 ## More R tips
 
-## Use a 'for'-loop to calculate the summary statistics
+## Use a 'for'-loop to calculate the summary statistics for each house
 ## and assign the result to a new data.frame
-num <- 2:5
 Tbl <- data.frame()
-for(i in num){
-  Tbl[i-1,"mean"] <- mean(D[ ,i])
-  Tbl[i-1,"var"] <- var(D[ ,i])
-}
-row.names(Tbl) <- names(D)[num]
-## View the contents of Tbl
+## Find the relevant columns
+selected <- c("Q1","Q2","Q3","Q4")
+## Calculate the summary statistics for each house
+for(i in selected){
+  ## Take the relevant column
+  x <- Dsel[, i]
+  ## Compute the sample mean
+  Tbl[i, "mean"] <- mean(x, na.rm=TRUE)
+  ## Compute the sample variance
+  Tbl[i, "var"] <- var(x, na.rm=TRUE) }
+## View the content of Tbl
 Tbl
-
-## In R there are even more condensed ways to perform such 
+  
+## In R there are even more condensed ways to do such 
 ## calculations, e.g.:
-apply(D[, num], 2, mean, na.rm=TRUE)
-## or several calculations in one expression
-apply(D[, num], 2, function(x){
+apply(Dsel[, selected], 2, mean, na.rm=TRUE)
+## or several calculations in one go
+apply(Dsel[, selected], 2, function(x){
   c(mean=mean(x, na.rm=TRUE),
-    var=var(x, na.rm=TRUE))
-})
+    var=var(x, na.rm=TRUE)) })
 ## See more useful functions with: ?apply, ?aggregate and ?lapply
 ## For extremely efficient data handling see, e.g., the packages: 
 ## dplyr, tidyr, reshape2 and ggplot2
 
 ## LaTeX tips:
-##
 ## The R package "xtable" can generate LaTeX tables written to a file 
 ## and thereby they can automatically be included in a .tex document.
-## 
 ## The R package "knitr" can be used very elegantly to generate .tex 
 ## documents with R code written directly in the document. This  
 ## document and the book were generated using knitr.
