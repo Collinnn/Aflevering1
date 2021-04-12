@@ -100,15 +100,18 @@ Tab
 
 #Tabeller
 Tabs <- data.frame()
-for(i in udvalgte){
+for(i in "Q1"){
   x <- Dsel[, i]
   f <-(mean(x, na.rm= TRUE) - 0.238e1) /sd(x,na.rm=TRUE) * sqrt(sum(!is.na(x)))
   Tabs[i, "p værdi"] <-2*(1-pt(f,sum(!is.na(x)))) 
-  
 }
+f
+-2*(1-pt(abs(f),df=sum(!is.na(x))-1))
+
 #Udregning af ligning til opgave H
 mean(x,na.rm=TRUE)
-mean(x)-2.38
+sd(x,na.rm=TRUE)
+
 
 
 #Print tabel
@@ -129,10 +132,15 @@ v<-(s1^2/n1+s2^2/n2)^2/(s1^4/n1^2/(n1-1)+s2^4/n2^2/(n2-1))
 v
 t<-(mean(Dsel$Q1,na.rm=T)-mean(Dsel$Q2,na.rm=T))/sqrt(s1^2/n1+s2^2/n2)
 t
+n1
+n2
+s1
+s2
 
 2*(1-pt(abs(t),df = v))
 #Testing for both
 t.test(Dsel$Q1,Dsel$Q2)
+
 
 
 
@@ -142,7 +150,15 @@ sum(De$Q1,na.rm=T)
 De<-na.omit(De)
 sum(De$Q1)
 sum(!is.na(De$Q1))
-#Correlation equation
+head(De)
+mean(De$Q1)
+sd(De$Q1)
+mean(De$G)
+sd(De$G)
+
+(1/509-1)*((2.1-2.371653)/1.483319)*((8.553098-143.8487)/105.9259)
+
+#Correlation equation 
 (1/(sum(!is.na(De$Q1))-1)*sum((De$Q1-mean(De$Q1))*(De$G-mean(De$G))))/(sd(De$G)*sd(De$Q1))
 
 plot(D$Q1,D$G,xlab= "Varmeforbrug hus 1(Kw/dag)",ylab = "Grundstråling(W/m^2)")
