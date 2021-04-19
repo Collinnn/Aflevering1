@@ -75,19 +75,63 @@ sum(!is.na(D_model$G))
 mean(D_model$G)
 sd(D_model$G)
 
+
+fit <- lm(Q ~ Ta, data = D_model)
+summary(fit)
+fit <- lm(Q ~ G, data = D_model)
+summary(fit)
 fit <- lm(Q ~ Ta + G, data = D_model)
 summary(fit)
 
+
+
+
+par(mfrow = c(3,1))
 plot(fit$fitted.values, D_model$Q, xlab = "Fitted values",
      ylab = "Heat consumption")
 # Residuals against each of the explanatory variables
-plot(D_model$EXPLANATORY_VARIABLE, fit$residuals,
-     xlab = "INSERT TEXT", ylab = "Residuals")
+plot(D_model$Q, fit$residuals,
+     xlab = "varmeforbrug", ylab = "Residuals",col="red")
+plot(D_model$Ta, fit$residuals,
+     xlab = "Udendørstemparatur", ylab = "Residuals",col="green")
+plot(D_model$G, fit$residuals,
+     xlab = "Indstråling", ylab = "Residuals",col="blue")
 # Residuals against fitted values
 plot(fit$fitted.values, fit$residuals, xlab = "Fitted values",
      ylab = "Residuals")
 # Normal QQ-plot of the residuals
 qqnorm(fit$residuals, ylab = "Residuals", xlab = "Z-scores",
-       main = "")
+       main = "Normal QQ-plot")
 qqline(fit$residuals)
+
+qt(0.95)
+qt(0.975,df=573)
+confint(fit, level = 0.95)
+B1 <- -0.2089526
+s1 <- -0.0058260
+t <- (B1-(-0.25))/s1
+2*pt(t,df=573)
+
+fit <- lm(Q ~ Ta + G, data = D_model)
+summary(fit)
+fitt <- lm(Q ~ Ta, data = D_model)
+summary(fitt)
+fitG <- lm(Q ~ G, data = D_model)
+summary(fitG)
+
+D_test <- subset(D, (t == "2008-12-06" & houseId == 3)|
+                   (t == "2009-02-22" & houseId == 5)|
+                   (t == "2009-03-12" & houseId == 10)|
+                   (t == "2009-04-01" & houseId == 17))
+
+
+pred <- predict(fit, newdata = D_test,
+                interval = "prediction", level = 0.95)
+# Observed values and predictions
+cbind(id = D_test$houseId, Q = D_test$Q, pred)
+
+summary(D_test)
+
+
+
 
